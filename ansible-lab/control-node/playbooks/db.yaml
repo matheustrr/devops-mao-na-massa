@@ -1,0 +1,37 @@
+---
+- name: Configurar servidor de banco de dados
+  hosts: db01
+  user: vagrant
+  become: yes
+  vars:
+    mysql_cli_command: "mysql"
+  vars_files:
+  - handlers/roles/templates/vars/main.yml
+  pre_tasks:
+  - name: Consertar dependencias do Ansible no CentOS 7 via RAW
+    raw: yum install -y rpm-python libselinux-python
+
+  - name: Criar link simbolico para compatibilidade do MariaDB no CentOS 7
+    file:
+      src: /usr/bin/mysql
+      dest: /usr/bin/mariadb
+      state: link
+    ignore_errors: yes
+
+  - name: Forçar limpeza da lista de usuarios para evitar o bug da role antiga
+    set_fact:
+      mysql_users: []
+
+  roles:
+  - configuracao-default-so
+  - role: geerlingguy.mysql
+
+  post_tasks:
+  - name: Criar usuario notesapp e conceder permissoes via SQL (Compativel com MariaDB 5.5 do CentOS 7)
+    shell: |
+      # WORKAROUND: O MariaDB 5.5 do CentOS 7 nao aceita 'IF NOT EXISTS' no CREATE USER.
+      # Caso o usuario ja exista, ignoramos o erro para nao quebrar o provisionamento idempotente.
+      mysql -u root -e "CREATE USER 'notesapp'@'%' IDENTIFIED BY 'devopsmaonamassa'; GRANT ALL PRIVILEGES ON notes.* TO 'notesapp'@'%'; FLUSH PRIVILEGES;"
+    register: db_user_result
+    changed_when: "'Query OK' in db_user_result.stdout or db_user_result.rc == 0"
+    ignore_errors: yes

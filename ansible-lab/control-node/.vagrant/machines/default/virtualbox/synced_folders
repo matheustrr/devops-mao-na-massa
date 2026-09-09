@@ -1,1 +1,1 @@
-{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"C:/Users/Matheus/Desktop/devops-mao-na-massa/ansible lab/app01/control-node","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}
+{"rsync":{"/vagrant":{"type":"rsync","guestpath":"/vagrant","hostpath":"C:/Users/Matheus/Desktop/devops-mao-na-massa/ansible-lab/control-node","disabled":false,"__vagrantfile":true,"owner":"vagrant","group":"vagrant"}}}
